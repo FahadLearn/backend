@@ -86,7 +86,7 @@ export const Login = async (req, res) => {
     });
     res.cookie("Customer_ID", user.Customer_ID, {
       httpOnly: false, // ✅ avoid js access
-      secure: true, // ✅ http secure
+      secure: false, // ✅ http secure
       sameSite: "Strict", // ✅ to use on one site
       maxAge: 3 * 24 * 60 * 60 * 1000, // ✅ 3 days
     });
@@ -183,52 +183,108 @@ export const chkLogin = async (req, res) => {
   }
 };
 
+// export const updateUser = async (req, res) => {
+//   try {
+//     const Customer_ID = req.cookies.Customer_ID;
+//     console.log(Customer_ID);
+//     const { Name, Email, Password, Address, Phone_Number } = req.body;
+
+//     if (!Customer_ID) {
+//       return res.status(400).json({ message: "User ID is required." });
+//     }
+
+//     // ✅ Check if user exists
+//     const user = await FindById(Customer_ID);
+//     if (!user) {
+//       return res.status(404).json({ message: "User does not exist." });
+//     }
+
+//     let IMG_URL = user.IMG_URL; // Default: Keep old image
+
+//     // ✅ If new image uploaded, delete old image
+//     if (req.file) {
+//       const oldImagePath = path.join("uploads", path.basename(user.IMG_URL)); // Old image path
+//       const newImagePath = `/uploads/${req.file.filename}`; // New image path
+
+//       // ❌ Delete old image if it exists
+//       if (user.IMG_URL && fs.existsSync(oldImagePath)) {
+//         fs.unlinkSync(oldImagePath);
+//       }
+
+//       IMG_URL = newImagePath; // ✅ Update image path
+//     }
+
+//     // ✅ Update user in database
+//     const updatedRows = await UpdateUser({
+//       Customer_ID,
+//       Name: Name || user.Name,
+//       Email: Email || user.Email,
+//       Password: Password || user.Password,
+//       Address: Address || user.Address,
+//       Phone_Number: Phone_Number || user.Phone_Number,
+//       IMG_URL,
+//     });
+
+//     if (updatedRows === 0) {
+//       return res.status(400).json({ message: "No changes made." });
+//     }
+
+//     res.status(200).json({ message: "User updated successfully." });
+//   } catch (error) {
+//     console.error("❌ Error updating user:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 export const updateUser = async (req, res) => {
   try {
-    const Customer_ID = req.cookies.Customer_ID;
-    const { Name, Email, Password, Address, Phone_Number } = req.body;
+    console.log("Cookies:", req.cookies);
+
+    const { Customer_ID } = req.cookies;
+    console.log("Extracted Customer ID:", Customer_ID);
 
     if (!Customer_ID) {
-      return res.status(400).json({ message: "User ID is required." });
+      return res
+        .status(400)
+        .json({ message: "Customer ID is required. File upload skipped." });
     }
 
-    // ✅ Check if user exists
-    const user = await FindById(Customer_ID);
+    const user = await FindById({ Customer_ID });
     if (!user) {
       return res.status(404).json({ message: "User does not exist." });
     }
 
-    let IMG_URL = user.IMG_URL; // Default: Keep old image
+    let IMG_URL = user.IMG_URL || ""; // ✅ Ensure it's always a string
 
-    // ✅ If new image uploaded, delete old image
-    if (req.file) {
-      const oldImagePath = path.join("uploads", path.basename(user.IMG_URL)); // Old image path
-      const newImagePath = `/uploads/${req.file.filename}`; // New image path
-
-      // ❌ Delete old image if it exists
-      if (user.IMG_URL && fs.existsSync(oldImagePath)) {
+    // ✅ Old Image Handling (Fixed `path = string` error)
+    if (user.IMG_URL) {
+      const oldImagePath = path.join("uploads", path.basename(user.IMG_URL));
+      if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
+    }
 
-      IMG_URL = newImagePath; // ✅ Update image path
+    // ✅ New Image Handling
+    if (req.file && req.file.filename) {
+      IMG_URL = `/uploads/${req.file.filename}`;
     }
 
     // ✅ Update user in database
     const updatedRows = await UpdateUser({
-      Customer_ID,
-      Name: Name || user.Name,
-      Email: Email || user.Email,
-      Password: Password || user.Password,
-      Address: Address || user.Address,
-      Phone_Number: Phone_Number || user.Phone_Number,
-      IMG_URL,
+      Customer_ID: Customer_ID,
+      Name: req.body.Name || user.Name,
+      Email: req.body.Email || user.Email,
+      Password: req.body.Password || user.Password,
+      Address: req.body.Address || user.Address,
+      Phone_Number: req.body.Phone_Number || user.Phone_Number,
+      IMG_URL: IMG_URL,
     });
 
     if (updatedRows === 0) {
       return res.status(400).json({ message: "No changes made." });
     }
 
-    res.status(200).json({ message: "User updated successfully." });
+    res.status(200).json({ message: "User profile updated successfully." });
   } catch (error) {
     console.error("❌ Error updating user:", error);
     res.status(500).json({ message: "Internal Server Error" });
