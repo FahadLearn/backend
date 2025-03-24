@@ -14,7 +14,7 @@ export const CreateRider = async ({
   RIDER_ID,
   Email,
   Password,
-  IMG = Null,
+  IMG = null,
 }) => {
   try {
     const sql =
@@ -67,3 +67,51 @@ export const FindByEmail = async ({ Email }) => {
   }
 };
 
+export const UpdateRider = async ({
+  RIDER_ID,
+  First_Name,
+  Last_Name,
+  City,
+  Vehicle,
+  Cnic,
+  Phone_No,
+  Date_of_Birth,
+  License,
+  Payment_Method,
+  Account_Title,
+  Email,
+  Password,
+  IMG,
+}) => {
+  try {
+    const sql = `
+      UPDATE RIDER 
+      SET First_Name = ?, Last_Name = ?, City = ?, Vehicle = ?, Cnic = ?, 
+          Phone_No = ?, Date_of_Birth = ?, License = ?, Payment_Method = ?, 
+          Account_Title = ?, Email = ?, Password = ?, IMG= ? 
+      WHERE RIDER_ID = ?
+    `;
+    const values = [
+      First_Name,
+      Last_Name,
+      City,
+      Vehicle,
+      Cnic,
+      Phone_No,
+      Date_of_Birth,
+      License,
+      Payment_Method,
+      Account_Title,
+      Email,
+      Password,
+      IMG,
+      RIDER_ID,
+    ];
+
+    const [result] = await db.execute(sql, values);
+    return result.affectedRows;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};

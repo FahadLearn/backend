@@ -82,7 +82,15 @@ export const UpdateUser = async ({
       SET Name = ?, Email = ?, Password = ?, Address = ?, Phone_Number = ?, IMG_URL = ? 
       WHERE Customer_ID = ?
     `;
-    const values = [Name, Email, Password, Address, Phone_Number, IMG_URL, Customer_ID];
+    const values = [
+      Name,
+      Email,
+      Password,
+      Address,
+      Phone_Number,
+      IMG_URL,
+      Customer_ID,
+    ];
 
     const [result] = await db.execute(sql, values);
     return result.affectedRows;
@@ -91,4 +99,3 @@ export const UpdateUser = async ({
     throw new Error(error);
   }
 };
-
