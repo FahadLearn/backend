@@ -54,7 +54,7 @@ export const Register = async (req, res) => {
     // ✅ Send response
     res.status(201).json({
       message: "User Registered",
-      user: newUser.Customer_ID, // ✅ Optional: return created user
+      user: newUser.Customer_ID,
       token: generateToken(userId),
     });
   } catch (error) {

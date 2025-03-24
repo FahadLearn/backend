@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import UserRouter from "./src/Routes/User.Routes.js";
+import RiderRoute from "./src/Routes/Rider.Routes.js";
 import db from "./src/config/db.js";
 
 import cors from "cors";
@@ -26,6 +27,7 @@ app.use(
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 // ✅ Routes
 app.use("/api", UserRouter);
+app.use("/Rider", RiderRoute);
 
 // ✅ Root route
 app.get("/", (req, res) => res.send("Food web application APIs are running"));
