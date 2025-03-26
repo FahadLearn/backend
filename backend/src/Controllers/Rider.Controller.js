@@ -24,6 +24,7 @@ export const createRider = async (req, res) => {
       Email,
       Password,
     } = req.body;
+    console.log("Received body:", req.body);
 
     if (
       !First_Name ||
@@ -46,11 +47,17 @@ export const createRider = async (req, res) => {
     console.log(Rider_ID);
 
     // Check if rider already exists
-    const Rider = await FindById({ Rider_ID });
-    if (Rider) {
+    // const Rider = await FindById({ Rider_ID });
+    // if (Rider) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Rider with this ID already exists." });
+    // }
+    const existingRider = await FindByEmail({ Email }); // Adjust function if needed
+    if (existingRider) {
       return res
         .status(400)
-        .json({ message: "Rider with this ID already exists." });
+        .json({ message: "Rider with this Email already exists." });
     }
     // Create new rider
     const newRider = await CreateRider({
@@ -88,14 +95,13 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    const token = generateToken(user);
     res.cookie("isLoggedIn", true, {
       httpOnly: false, // ✅ avoid js access
       secure: true, // ✅ http secure
       sameSite: "Strict", // ✅ to use on one site
       maxAge: 3 * 24 * 60 * 60 * 1000, // ✅ 3 days
     });
-    res.cookie("Customer_ID", user.Customer_ID, {
+    res.cookie("Rider_ID", user.RIDER_ID, {
       httpOnly: false, // ✅ avoid js access
       secure: true, // ✅ http secure
       sameSite: "Strict", // ✅ to use on one site
@@ -103,7 +109,6 @@ export const login = async (req, res) => {
     });
     res.json({
       message: "Login successful",
-      token,
       user: {
         Rider_ID: user.RIDER_ID,
         Name: user.First_Name,
@@ -116,7 +121,7 @@ export const login = async (req, res) => {
 };
 export const logout = async (req, res) => {
   res.clearCookie("isLoggedIn");
-  res.clearCookie("Customer_ID");
+  res.clearCookie("Rider_ID");
   res.json({ message: "Logged Out" });
 };
 

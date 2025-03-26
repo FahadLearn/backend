@@ -130,3 +130,15 @@ export const UpdateUser = async ({
     throw new Error(error);
   }
 };
+
+export const chkRider = async ({ Email }) => {
+  try {
+    const sql = `SELECT * FROM RIDER where Email=?`;
+    const values = [Email];
+    const [rows] = await db.execute(sql, values);
+    return rows.length > 0 ? rows[0] : null; // Return rider if found, otherwise null
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
