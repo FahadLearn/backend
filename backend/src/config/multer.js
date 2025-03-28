@@ -2,25 +2,24 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Ensure uploads folder exists
-const uploadDir = path.join("uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Ensure "uploads/customer" folder exists
+const customerDir = path.join("uploads", "customer");
+if (!fs.existsSync(customerDir)) {
+  fs.mkdirSync(customerDir, { recursive: true });
 }
 
 // Configure Multer Storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    console.log("📂 Saving file to:", uploadDir); // Debugging
-    cb(null, uploadDir);
+    console.log("📂 Saving file to:", customerDir); // Debugging
+    cb(null, customerDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    console.log(
-      "📸 Generating filename:",
-      uniqueSuffix + path.extname(file.originalname)
-    ); // Debugging
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    const fileName = uniqueSuffix + path.extname(file.originalname);
+
+    console.log("📸 Generating filename:", fileName); // Debugging
+    cb(null, fileName);
   },
 });
 
